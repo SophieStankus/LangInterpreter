@@ -1,9 +1,10 @@
 import java.io.IOException;
 public class Interpreter {
     String output = "";
-    Environment currentEnv = new Environment();
+    Environment currentEnv;
 
     String execute(Parse node) {
+        currentEnv = new Environment();
         try {
             exec(node);
         } catch (ArithmeticException e) {
@@ -72,29 +73,31 @@ public class Interpreter {
     void exec_declare(Parse node) {
         StatementParse parse = (StatementParse)node;
         Parse variable = parse.children.get(0);
+        int newValue = eval(parse.children.get(1));
         if (currentEnv.contains(variable.getName())) {
             throw new AssertionError("runtime error: variable already defined");
         }
         // add new environment variable
-        int newValue = eval(parse.children.get(1));
         currentEnv.addVariable(variable.getName(), newValue);
     }
 
     // assign
     void exec_assign(Parse node) {
-        Environment currentEnviro = eval_varloc(node);
         StatementParse parse = (StatementParse)node;
-        String originalLoc = parse.children.get(0).getName();
+        StatementParse originalLoc = (StatementParse)parse.children.get(0);
+        String newVar = originalLoc.children.get(0).getName();
         int newValue = eval(parse.children.get(1));
-        currentEnviro.setVariable(originalLoc, newValue);
+        Environment currentEnviro = eval_varloc(node);
+        currentEnviro.setVariable(newVar, newValue);
     }
 
     // Varloc
     Environment eval_varloc(Parse node) {
         Environment currentEnviro = currentEnv;
         StatementParse parse = (StatementParse)node;
-        Parse variable = parse.children.get(0);
-        while (!currentEnviro.contains(variable.getName())) {
+        StatementParse variable = (StatementParse)parse.children.get(0);
+        String newVar = variable.children.get(0).getName();
+        while (!currentEnviro.contains(newVar)) {
             currentEnviro = currentEnviro.parent;
             if (currentEnviro == null) {
                 throw new AssertionError("runtime error: undefined variable");
@@ -166,3 +169,4 @@ public class Interpreter {
         
     }
 }
+
