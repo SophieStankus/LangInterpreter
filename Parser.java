@@ -150,10 +150,16 @@ public class Parser {
         // Parse req_space
         System.out.println("Parsing reqsp dec " + index + " " + str.charAt(index));
         counter = this.parse(str, index, "req_space");
+        if (counter.equals(Parser.FAIL)) {
+            return Parser.FAIL;
+        }
         index = counter.getIndex();
         // Parse assignment statement
         System.out.println("Parsing assg dec " + index + " " + str.charAt(index));
         Parse newParse = this.parse(str, index, "assignment");
+        if (newParse.equals(Parser.FAIL)) {
+            return Parser.FAIL;
+        }
         index = newParse.getIndex();
         var.setIndex(index);
         // change names (newParse.children[0] = varloc, varloc.children[0] = name, newParse.children[1] = value)
@@ -196,7 +202,13 @@ public class Parser {
         // Parse expression
         System.out.println("Parsing exp assg " + index + " " + str.charAt(index));
         Parse expression = this.parse(str, index, "expression");
+        if (expression.equals(Parser.FAIL)) {
+            return Parser.FAIL;
+        }
         index = expression.getIndex();
+        if (index >= str.length()) {
+            return Parser.FAIL;
+        }
         toReturn.children.add(expression);
         // Parse opt space
         System.out.println("Parsing opstp assg " + index + " " + str.charAt(index));
@@ -218,6 +230,9 @@ public class Parser {
         // Parse identifier
         System.out.println("Parsing iden loc " + index + " " + str.charAt(index));
         Parse location = this.parse_identifier(str, index);
+        if (location.equals(Parser.FAIL)) {
+            return Parser.FAIL;
+        }
         return location;
     }
 
@@ -234,7 +249,10 @@ public class Parser {
         varName += identifier.getName();
         index = identifier.getIndex();
         // parse other chars 
-        while (str.charAt(index) != ' ' && str.charAt(index) != '\n' && str.charAt(index) != ';') {
+        while (str.charAt(index) != ' ' && str.charAt(index) != '\n' && str.charAt(index) != ';' 
+        && str.charAt(index) != '#' && str.charAt(index) != '+' && str.charAt(index) != '-'
+        && str.charAt(index) != '/' && str.charAt(index) != '*' && str.charAt(index) != ')' 
+        && str.charAt(index) != '(') {
             System.out.println("parsing char iden " + index + " " + str.charAt(index));
             identifier = parse_identifier_char(str, index);
             if (identifier.equals(Parser.FAIL)) {
@@ -263,7 +281,7 @@ public class Parser {
         System.out.println("parsing char " + index + " " + str.charAt(index));
         char first = str.charAt(index);
         String toReturn = "";
-        if (Character.isLetterOrDigit(first) || first == '-') {
+        if (Character.isLetterOrDigit(first) || first == '_') {
             toReturn += first;
             return new StatementParse(toReturn, index+1);
         } else {
@@ -276,7 +294,7 @@ public class Parser {
         System.out.println("first char " + index + " " + str.charAt(index));
         char first = str.charAt(index);
         String toReturn = "";
-        if (Character.isLetter(first) || first == '-') {
+        if (Character.isLetter(first) || first == '_') {
             toReturn += first;
             return new StatementParse(toReturn, index+1);
         } else {
@@ -377,7 +395,7 @@ public class Parser {
             if (!newParse.equals(Parser.FAIL)) {
                 return new Parse(str, newParse.getIndex());
             } 
-        } else if (str.charAt(index) == ' ') {
+        } else if (str.charAt(index) == ' ' || str.charAt(index) == '\t'){
             // Parse blank 
             return new Parse(str, index + 1);
         } else {
@@ -417,7 +435,7 @@ public class Parser {
     private Parse parse_req_space(String str, int index) {
         Parse newParse;
         //System.out.println("reqspace " + index);
-        if (str.charAt(index) != ' ') {
+        if (str.charAt(index) != ' ' && str.charAt(index) != '\n') {
             return Parser.FAIL;
         }
         // Parse 1 or more spaces
@@ -433,7 +451,7 @@ public class Parser {
         return new Parse("space", index);
     }
 
-    // Operand parser (parenthesis or integer)
+    // Operand parser 
     private Parse parse_operand(String str, int index) {
         if (index >= str.length()) {
             return Parser.FAIL;
