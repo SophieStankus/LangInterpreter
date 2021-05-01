@@ -14,7 +14,7 @@ public class Parse {
         return (this.name.equals(other.name)) && (this.index == other.index);
     }
 
-    public int getName() {
+    public String getName() {
         return this.name;
     }
 
@@ -24,6 +24,10 @@ public class Parse {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public void setName(String str) {
+        this.name = str;
     }
 
 }
