@@ -16,3 +16,4 @@ public class IntegerParse extends Parse {
         return this.value;
     }
 }
+
