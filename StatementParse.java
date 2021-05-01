@@ -14,6 +14,10 @@ public class StatementParse extends Parse {
         return this.children;
     }
 
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public String toString() {
         String result = "";
         result += "(";
